@@ -1,4 +1,6 @@
 import 'package:tflite_flutter/tflite_flutter.dart';
+import 'package:flutter/services.dart';
+import 'dart:typed_data';
 import 'ml_service.dart';
 
 class MobileMLService implements MLService {
@@ -7,7 +9,13 @@ class MobileMLService implements MLService {
   @override
   Future<void> loadModel() async {
     try {
-      _interpreter = await Interpreter.fromAsset('linear.tflite');
+      // Load the asset data as bytes
+      final ByteData assetData = await rootBundle.load('assets/linear.tflite');
+      final Uint8List bytes = assetData.buffer.asUint8List();
+      print('Asset loaded successfully: ${bytes.length} bytes');
+
+      // Create interpreter from bytes
+      _interpreter = Interpreter.fromBuffer(bytes);
       print('TensorFlow Lite model loaded successfully');
     } catch (e) {
       print('Error loading TensorFlow Lite model: $e');
