@@ -8,9 +8,9 @@ class MobileMLService implements MLService {
   Future<void> loadModel() async {
     try {
       _interpreter = await Interpreter.fromAsset('linear.tflite');
-      print('Model loaded successfully');
+      print('TensorFlow Lite model loaded successfully');
     } catch (e) {
-      print('Error loading model: $e');
+      print('Error loading TensorFlow Lite model: $e');
       rethrow;
     }
   }
@@ -18,17 +18,25 @@ class MobileMLService implements MLService {
   @override
   double predict(double input) {
     if (_interpreter == null) {
-      throw Exception('Model not loaded');
+      throw Exception('TensorFlow Lite model not loaded');
     }
 
-    // Prepare input and output tensors
-    var inputData = [input];
-    var outputData = List.filled(1, 0.0).reshape([1, 1]);
+    try {
+      // Prepare input tensor - reshape to match model input shape [1, 1]
+      var inputData = [[input]];
 
-    // Run inference
-    _interpreter!.run(inputData, outputData);
+      // Prepare output tensor - create a 2D array to match output shape [1, 1]
+      var outputData = List.generate(1, (_) => List.filled(1, 0.0));
 
-    return outputData[0][0];
+      // Run inference with the TensorFlow Lite model
+      _interpreter!.run(inputData, outputData);
+
+      // Return the prediction result
+      return outputData[0][0];
+    } catch (e) {
+      print('Error during prediction: $e');
+      throw Exception('Prediction failed: $e');
+    }
   }
 }
 

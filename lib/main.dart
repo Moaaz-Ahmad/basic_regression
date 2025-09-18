@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'TensorFlow Lite Regression',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Linear Regression with TensorFlow Lite'),
     );
   }
 }
@@ -82,18 +82,22 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       if (mlService == null) {
         setState(() {
-          result = 'Model not available on this platform/test.';
+          result = 'ML service not available on this platform.';
         });
         return;
       }
       final input = double.parse(numberController.text);
       final prediction = mlService!.predict(input);
       setState(() {
-        result = "The predicted value is $prediction";
+        result = "TensorFlow Lite prediction: ${prediction.toStringAsFixed(4)}";
       });
     } catch (e) {
       setState(() {
-        result = 'Invalid input or model not loaded yet';
+        if (e.toString().contains('TensorFlow Lite models are not supported on web')) {
+          result = 'Web platform detected: TensorFlow Lite not supported.\nPlease use mobile app for ML predictions.';
+        } else {
+          result = 'Error: ${e.toString().replaceAll('Exception: ', '')}';
+        }
       });
     }
   }
